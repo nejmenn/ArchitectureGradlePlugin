@@ -34,7 +34,7 @@ jobs:
       - name: Test and publish
         env:
           GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_PAT }}
           RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
         run: |
           VERSION="${RELEASE_VERSION#v}"
