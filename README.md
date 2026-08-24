@@ -439,6 +439,45 @@ build/reports/architecture/
 
 The versioned JSON schema includes success state, counts, stable rule ID, severity, file, optional line, message, evidence, and recommendation. The report task always writes artifacts; `architectureCheck` is the task that fails on `ERROR` violations.
 
+### Example output
+
+A project that follows the configured architecture produces:
+
+```text
+> Task :architectureCheck
+ArchitectureGradlePlugin Check
+===========================
+
+No violations found.
+
+0 violation(s) found.
+```
+
+When a rule is violated, the output identifies the stable rule ID, source location, evidence, and recommended correction:
+
+```text
+> Task :architectureCheck
+ArchitectureGradlePlugin Check
+===========================
+
+ARCH-006 Forbidden Type Suffix
+
+src/main/kotlin/com/example/myservice/access/service/AccessService.kt:4
+
+Types ending with 'Service' are forbidden.
+
+Found:
+AccessService
+
+Recommended:
+AccessUseCase
+
+1 violation(s) found.
+
+> Task :architectureCheck FAILED
+Architecture check failed. 1 error violation(s) found.
+```
+
 ## Build and test
 
 ```bash
