@@ -38,6 +38,74 @@ Do not combine Spring and Android presets in the same application. Presets add d
 
 Applying the plugin at the root makes it inspect every subproject. Applying it to a subproject limits discovery to that project and its descendants.
 
+## Create your own Gradle preset
+
+The built-in `preset("...")` function resolves presets shipped by ArchitectureGradlePlugin, but using one is optional. Because the plugin DSL is Kotlin, a build can define its own reusable preset as an extension function and apply it without selecting a built-in preset.
+
+The following root `build.gradle.kts` defines an Android preset owned by the consuming project:
+
+```kotlin
+import br.com.nejmenn.architecture.android.DomainPurity
+import br.com.nejmenn.architecture.gradle.ArchitectureGradlePluginExtension
+
+plugins {
+    id("br.com.nejmenn.architecture") version "1.1.0"
+}
+
+fun ArchitectureGradlePluginExtension.auroraAndroidPreset() {
+    basePackage = "com.example.aurora"
+    attachToCheck = true
+
+    naming {
+        oneTypePerFile = true
+        filenameMustMatchType = true
+        forbiddenSuffix(
+            suffix = "Service",
+            recommendation = "UseCase",
+        )
+    }
+
+    android {
+        domainPurity = DomainPurity.STRICT
+
+        domainModulePatterns.add(":core:domain")
+        featureApiModulePattern = ":features:*:api"
+        featureImplementationModulePattern = ":features:*:impl"
+
+        composeAllowedModulePatterns.addAll(
+            ":app",
+            ":core:ui",
+            ":features:*:impl",
+        )
+        roomAllowedModulePatterns.add(":core:data")
+        androidComponentAllowedModulePatterns.add(":app")
+    }
+
+    modules {
+        modulePattern(":features:*:api") {
+            mayDependOn(":core:domain", ":core:utils")
+        }
+        modulePattern(":features:*:impl") {
+            mayDependOn(":core:**", ":features:*:api")
+        }
+    }
+
+    sources {
+        include("**/src/main/java/**/*.kt")
+        include("**/src/main/kotlin/**/*.kt")
+        exclude("**/build/**", "**/generated/**", "**/ksp/**")
+    }
+}
+
+architectureGradlePlugin {
+    auroraAndroidPreset()
+}
+```
+
+This custom function is the project's preset: it can be called wherever the plugin is applied and can accept parameters when different applications need small variations. For reuse across multiple repositories, move the function into a Gradle convention plugin in `build-logic` and version that convention independently.
+
+Do not also call `preset("android-clean-feature")` unless the intention is to extend its defaults. Preset and DSL configuration are cumulative; when replacing a collection inherited from a built-in preset, call `clear()` before adding the project's values.
+
 ## Recommended architectures — source of truth
 
 The structures below are the canonical ArchitectureGradlePlugin recommendations for new projects. They define module responsibilities and dependency direction for each supported platform. A project may use fewer modules when its size does not justify every split, but it should preserve the same boundaries and inward dependency flow.
