@@ -1,4 +1,5 @@
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 
 plugins {
@@ -9,7 +10,7 @@ val githubPackagesActor = providers.gradleProperty("gpr.user")
     .orElse(providers.environmentVariable("GITHUB_ACTOR"))
 val githubPackagesToken = providers.gradleProperty("gpr.key")
     .orElse(providers.environmentVariable("GITHUB_TOKEN"))
-val githubPackagesUrl = uri("https://maven.pkg.github.com/jaimenejaim/ArchitectureGradlePlugin")
+val githubPackagesUrl = uri("https://maven.pkg.github.com/nejmenn/ArchitectureGradlePlugin")
 
 val validateGitHubPackagesCredentials by tasks.registering {
     group = "publishing"
@@ -32,6 +33,15 @@ subprojects {
 
     pluginManager.withPlugin("maven-publish") {
         extensions.configure<PublishingExtension> {
+            publications.withType<MavenPublication>().configureEach {
+                pom.withXml {
+                    val distributionManagement = asNode().appendNode("distributionManagement")
+                    val repository = distributionManagement.appendNode("repository")
+                    repository.appendNode("id", "github")
+                    repository.appendNode("url", githubPackagesUrl.toString())
+                }
+            }
+
             repositories.maven {
                 name = "GitHubPackages"
                 url = githubPackagesUrl
