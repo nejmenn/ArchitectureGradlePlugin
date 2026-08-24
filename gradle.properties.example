@@ -1,0 +1,8 @@
+# Copy this file to gradle.properties for local development.
+org.gradle.caching=true
+org.gradle.parallel=true
+kotlin.code.style=official
+
+# GitHub Packages credentials must never be committed.
+# gpr.user=your-github-username
+# gpr.key=your-personal-access-token-classic
