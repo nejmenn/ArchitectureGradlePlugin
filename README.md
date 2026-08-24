@@ -20,41 +20,6 @@ This is a public, open-source project hosted at [nejmenn/ArchitectureGradlePlugi
 
 The core has no Gradle API dependency. Gradle project dependencies are captured by the integration module and converted into violations using the same result model.
 
-## Consume in another project
-
-GitHub Packages requires authentication even when the package and its source repository are public. Create a personal access token (classic) with `read:packages`, then put the credentials in your user-level `~/.gradle/gradle.properties` file:
-
-```properties
-gpr.user=your-github-username
-gpr.key=your-personal-access-token-classic
-```
-
-Do not commit these credentials to a project repository.
-
-Because this artifact is a Gradle plugin, add the GitHub Packages repository to `pluginManagement` in the consumer's `settings.gradle.kts`:
-
-```kotlin
-pluginManagement {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/nejmenn/architecturegradleplugin")
-            credentials {
-                username = providers.gradleProperty("gpr.user").orNull
-                    ?: System.getenv("GITHUB_USER")
-                    ?: System.getenv("GITHUB_ACTOR")
-                password = providers.gradleProperty("gpr.key").orNull
-                    ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-        gradlePluginPortal()
-        mavenCentral()
-    }
-}
-
-rootProject.name = "my-service"
-```
-
 ## Choose a platform preset
 
 Apply the plugin once, preferably in the root `build.gradle.kts`, and select exactly one platform preset:
