@@ -1,8 +1,12 @@
 # ArchitectureGradlePlugin
 
+[![Build](https://github.com/nejmenn/ArchitectureGradlePlugin/actions/workflows/publish.yml/badge.svg)](https://github.com/nejmenn/ArchitectureGradlePlugin/actions/workflows/publish.yml)
+
 `ArchitectureGradlePlugin` centralizes architecture checks for Kotlin/Spring Boot backends and Android applications. The same Gradle plugin discovers Kotlin sources across a multi-project build, analyzes every source once, and activates platform-specific rules through presets.
 
 This is a public, open-source project hosted at [nejmenn/ArchitectureGradlePlugin](https://github.com/nejmenn/ArchitectureGradlePlugin).
+
+**Publication status:** version `1.1.0` is published on GitHub Packages. The plugin ID is `br.com.nejmenn.architecture`, and the library group is `br.com.nejmenn`.
 
 ## Modules
 
@@ -12,7 +16,7 @@ This is a public, open-source project hosted at [nejmenn/ArchitectureGradlePlugi
 | `architecture-presets` | Named default configurations. Currently provides `spring-hexagonal`. |
 | `architecture-android` | Android Clean Architecture presets and rules for framework purity, feature isolation, Compose, Room, components, and external dependencies. |
 | `architecture-gradle-plugin` | Plugin DSL, cacheable Gradle tasks, multi-project discovery, Gradle module dependency inspection, reports, publication, and `check` integration. |
-| `examples` | Standalone Spring and Android consumers using composite builds, so they can run before publication. |
+| `examples` | Standalone Spring and Android consumers using composite builds, so they can run without downloading published artifacts. |
 
 The core has no Gradle API dependency. Gradle project dependencies are captured by the integration module and converted into violations using the same result model.
 
@@ -190,7 +194,7 @@ plugins {
 
 architectureGradlePlugin {
     preset("spring-hexagonal")
-    basePackage = "br.com.nejmenn.orion"
+    basePackage = "com.example.myservice"
 }
 ```
 
@@ -203,15 +207,15 @@ The canonical Spring module graph and dependency rules are defined in [Spring so
 ```kotlin
 architectureGradlePlugin {
     preset("spring-hexagonal")
-    basePackage = "br.com.nejmenn.orion"
+    basePackage = "com.example.myservice"
     attachToCheck = true
 
     domain {
         modelSuffix = "Domain"
         forbiddenImports.addAll(
             "org.springframework.",
-            "br.com.nejmenn.orion.infrastructure.",
-            "br.com.nejmenn.orion.web.",
+            "com.example.myservice.infrastructure.",
+            "com.example.myservice.web.",
         )
     }
 
@@ -288,7 +292,7 @@ plugins {
 
 architectureGradlePlugin {
     preset("android-clean-feature")
-    basePackage = "br.com.nejmenn.myapp"
+    basePackage = "com.example.myapp"
 
     android {
         domainPurity = DomainPurity.STRICT
@@ -314,7 +318,7 @@ import br.com.nejmenn.architecture.android.DomainPurity
 
 architectureGradlePlugin {
     preset("android-clean-feature")
-    basePackage = "br.com.nejmenn.myapp"
+    basePackage = "com.example.myapp"
     attachToCheck = true
 
     android {
@@ -415,7 +419,7 @@ Presets are applied at the point where `preset(...)` is called. Statements after
 
 `architectureCheck` fails on `ERROR` violations. `architectureReport` always writes JSON, text, and HTML reports. Set `attachToCheck = false` when the architecture check should not participate in the normal Gradle `check` lifecycle.
 
-### Consume core or platform modules directly
+## Consume library modules directly
 
 Most projects only need the Gradle plugin. Tools that need the engine as a library can add the authenticated GitHub Packages repository to `dependencyResolutionManagement` and consume individual modules:
 
@@ -479,60 +483,6 @@ Run the example directly:
 ```bash
 ./gradlew -p examples/spring-hexagonal-example architectureCheck
 ./gradlew -p examples/android-clean-feature-example architectureCheck
-```
-
-## Publish locally
-
-```bash
-./gradlew publishToMavenLocal -Pversion=1.1.0
-```
-
-Consumers can then add `mavenLocal()` to `pluginManagement.repositories` and use version `1.1.0`.
-
-## Orion migration
-
-Replace the custom task in Orion's root `build.gradle.kts` with:
-
-```kotlin
-plugins {
-    id("br.com.nejmenn.architecture") version "1.1.0"
-}
-
-architectureGradlePlugin {
-    preset("spring-hexagonal")
-    basePackage = "br.com.nejmenn.orion"
-
-    domain {
-        forbiddenImports.addAll(
-            "org.springframework.",
-            "br.com.nejmenn.orion.web.",
-            "br.com.nejmenn.orion.adapter.",
-            "br.com.nejmenn.orion.infrastructure.",
-        )
-    }
-    modules {
-        module(":domain:device") { mayDependOn(":shared:kernel") }
-        module(":application:device") { mayDependOn(":domain:device", ":shared:kernel") }
-    }
-}
-```
-
-Example failure output:
-
-```text
-ArchitectureGradlePlugin Check
-===========================
-
-ARCH-006 Forbidden Type Suffix
-
-domain/access/src/main/kotlin/br/com/nejmenn/orion/access/AccessService.kt:4
-
-Types ending with 'Service' are forbidden.
-
-Recommended:
-AccessUseCase
-
-Architecture check failed. 1 error violation(s) found.
 ```
 
 ## Implementation decisions

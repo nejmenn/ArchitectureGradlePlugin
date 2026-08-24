@@ -6,8 +6,10 @@ on:
       version:
         description: Version to publish
         required: true
-        default: 1.1.0
+        default: 1.1.1
   push:
+    branches:
+      - master
     tags:
       - "v*"
 
@@ -31,11 +33,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Test and publish
+      - name: Test
+        run: ./gradlew clean test
+
+      - name: Publish
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.MY_PAT }}
           RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
         run: |
           VERSION="${RELEASE_VERSION#v}"
-          ./gradlew clean test publishToGitHubPackages -Pversion="$VERSION"
+          ./gradlew publishToGitHubPackages -Pversion="$VERSION"
