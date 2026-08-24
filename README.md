@@ -2,7 +2,12 @@
 
 [![Build](https://github.com/nejmenn/ArchitectureGradlePlugin/actions/workflows/publish.yml/badge.svg)](https://github.com/nejmenn/ArchitectureGradlePlugin/actions/workflows/publish.yml)
 
+
 `ArchitectureGradlePlugin` centralizes architecture checks for Kotlin/Spring Boot backends and Android applications. The same Gradle plugin discovers Kotlin sources across a multi-project build, analyzes every source once, and activates platform-specific rules through presets.
+
+By moving deterministic architecture validation into the build pipeline, the plugin can also reduce LLM token usage in AI-assisted development workflows. Instead of requiring coding agents and language models to repeatedly inspect large portions of the codebase to understand and validate architectural constraints, those rules are encoded once and enforced automatically by Gradle.
+
+This makes architecture checks deterministic, reusable, CI-friendly, and token-efficient, allowing LLMs to spend more of their context and tokens on implementation, reasoning, refactoring, and problem-solving rather than repeatedly rediscovering architecture rules from source code and documentation.
 
 This is a public, open-source project hosted at [nejmenn/ArchitectureGradlePlugin](https://github.com/nejmenn/ArchitectureGradlePlugin).
 
