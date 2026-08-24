@@ -34,7 +34,7 @@ pluginManagement {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/nejmenn/ArchitectureGradlePlugin")
+            url = uri("https://maven.pkg.github.com/nejmenn/architecturegradleplugin")
             credentials {
                 username = providers.gradleProperty("gpr.user").orNull
                     ?: System.getenv("GITHUB_USER")

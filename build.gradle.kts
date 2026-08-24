@@ -10,7 +10,7 @@ val githubPackagesActor = providers.gradleProperty("gpr.user")
     .orElse(providers.environmentVariable("GITHUB_ACTOR"))
 val githubPackagesToken = providers.gradleProperty("gpr.key")
     .orElse(providers.environmentVariable("GITHUB_TOKEN"))
-val githubPackagesUrl = uri("https://maven.pkg.github.com/nejmenn/ArchitectureGradlePlugin")
+val githubPackagesUrl = uri("https://maven.pkg.github.com/nejmenn/architecturegradleplugin")
 
 val validateGitHubPackagesCredentials by tasks.registering {
     group = "publishing"
